@@ -1,0 +1,10 @@
+# Dropbox file from Mac
+.dropbox
+desktop.ini
+
+# For XCode
+.DS_Store
+UserInterfaceState.xcuserstate
+
+# Personal Xcode User Settings
+xcuserdata/ 
