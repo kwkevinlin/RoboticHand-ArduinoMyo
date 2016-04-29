@@ -8,3 +8,6 @@ UserInterfaceState.xcuserstate
 
 # Personal Xcode User Settings
 xcuserdata/ 
+
+# Arduino Folder
+Arduino/
