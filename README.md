@@ -2,4 +2,4 @@
 
 A program to control the movements of a 3D-printed InMoov prosthetic hand using the Myo armband as the source of movement, and an Arduino board as the servo motors' control unit.
 
-In collaboratin with Cyrus Liu.
+Semester project with Cyrus Liu.
