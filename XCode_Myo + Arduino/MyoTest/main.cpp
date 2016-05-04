@@ -10,11 +10,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-// The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
-// Classes that inherit from myo::DeviceListener can be used to receive events from Myo devices. DeviceListener
-// provides several virtual functions for handling different kinds of events. If you do not override an event, the
-// default behavior is to do nothing.
 
 std::string angle;
 std::string command;
@@ -28,8 +24,7 @@ public:
     {
     }
     // onUnpair() is called whenever the Myo is disconnected from Myo Connect by the user.
-    void onUnpair(myo::Myo* myo, uint64_t timestamp)
-    {
+    void onUnpair(myo::Myo* myo, uint64_t timestamp) {
         // We've lost a Myo.
         // Let's clean up some leftover state.
         roll_w = 0;
@@ -40,8 +35,7 @@ public:
     }
     // onOrientationData() is called whenever the Myo device provides its current orientation, which is represented
     // as a unit quaternion.
-    void onOrientationData(myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat)
-    {
+    void onOrientationData(myo::Myo* myo, uint64_t timestamp, const myo::Quaternion<float>& quat) {
         using std::atan2;
         using std::asin;
         using std::sqrt;
@@ -71,116 +65,112 @@ public:
             // the text on the screen. The Myo will vibrate.
             myo->notifyUserAction();
             
+            /*
+             Detect pose then send command to Arduino to turn servos
+             Each command has 5 characters, from the left [0] = thumb, [1] = index, [2] = middle, etc
+             r = rest, return finger to "fingers spread" position
+             c = close, pull finger back to the palm
+            */
             if(pose == myo::Pose::fingersSpread) {
-                std::string command = "rrrrr";
+                std::string command = "rrrrr"; //Open hand
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
             } else if(pose == myo::Pose::fist) {
-                std::string command = "ccccc";
+                std::string command = "ccccc"; //Close hand to form fist
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
-            } else if(pose == myo::Pose::waveOut) {
-                std::string command = "rrcrr";
-                fprintf(arduino,"%s", command.c_str());
-                fflush(arduino);
-                sleep(1);
-                command = "rcrrr";
+            } else if(pose == myo::Pose::waveOut) { //A basic fingers movement sequence
+                std::string command = "rrcrr"; //Only middle finger down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
                 sleep(1);
-                command = "crrrr";
+                command = "rcrrr"; //Only index finger down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
                 sleep(1);
-                command = "rrrrr";
+                command = "crrrr"; //Only thum down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
-            } else if(pose == myo::Pose::doubleTap) {
-//                std::string command = "crccc";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "crrcc";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "rrrcc";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "crrrr";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "rrrrr";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "crrrc";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "crrcr";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "crcrr";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-//                sleep(2);
-//                command = "ccrrr";
-//                fprintf(arduino,"%s", command.c_str());
-//                fflush(arduino);
-            }else if(pose == myo::Pose::waveIn) {
-                std::string command = "crrrc";
+                sleep(1);
+                command = "rrrrr"; //Back to "finger spread" rest position
+                fprintf(arduino,"%s", command.c_str());
+                fflush(arduino);
+            } else if(pose == myo::Pose::waveIn) { //Form "W", "F", "U" in American Sign Language (ASL)
+                std::string command = "crrrc"; //Thumb, pinky down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
                 sleep(2);
-                command = "ccrrr";
+                command = "ccrrr"; //Thumb, index down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
                 sleep(2);
-                command = "crrcc";
+                command = "crrcc"; //Thum, ring, pinky down
                 fprintf(arduino,"%s", command.c_str());
                 fflush(arduino);
+            } else if(pose == myo::Pose::doubleTap) { //Perform 1-9 in ASL continuously 
+               std::string command = "crccc";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "crrcc";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "rrrcc";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "crrrr";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "rrrrr";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "crrrc";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "crrcr";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "crcrr";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
+               sleep(2);
+               command = "ccrrr";
+               fprintf(arduino,"%s", command.c_str());
+               fflush(arduino);
             }
         }
-//        } else {
-//            // Tell the Myo to stay unlocked only for a short period. This allows the Myo to stay unlocked while poses
-//            // are being performed, but lock after inactivity.
-//            myo->unlock(myo::Myo::unlockTimed);
-//        }
     }
     // onArmSync() is called whenever Myo has recognized a Sync Gesture after someone has put it on their
     // arm. This lets Myo know which arm it's on and which way it's facing.
     void onArmSync(myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation,
-                   myo::WarmupState warmupState)
-    {
+                   myo::WarmupState warmupState) {
         onArm = true;
         whichArm = arm;
     }
     // onArmUnsync() is called whenever Myo has detected that it was moved from a stable position on a person's arm after
     // it recognized the arm. Typically this happens when someone takes Myo off of their arm, but it can also happen
     // when Myo is moved around on the arm.
-    void onArmUnsync(myo::Myo* myo, uint64_t timestamp)
-    {
+    void onArmUnsync(myo::Myo* myo, uint64_t timestamp) {
         onArm = false;
     }
     // onUnlock() is called whenever Myo has become unlocked, and will start delivering pose events.
-    void onUnlock(myo::Myo* myo, uint64_t timestamp)
-    {
+    void onUnlock(myo::Myo* myo, uint64_t timestamp) {
         isUnlocked = true;
     }
     // onLock() is called whenever Myo has become locked. No pose events will be sent until the Myo is unlocked again.
-    void onLock(myo::Myo* myo, uint64_t timestamp)
-    {
+    void onLock(myo::Myo* myo, uint64_t timestamp) {
         isUnlocked = false;
     }
     // There are other virtual functions in DeviceListener that we could override here, like onAccelerometerData().
     // For this example, the functions overridden above are sufficient.
     // We define this function to print the current values that were updated by the on...() functions above.
-    void print()
-    {
+    void print() {
         // Clear the current line
         std::cout << '\r';
         // Print out the orientation. Orientation data is always available, even if no arm is currently recognized.
@@ -212,8 +202,7 @@ public:
     myo::Pose currentPose;
 };
 
-int main(int argc, char** argv)
-{  
+int main(int argc, char** argv) {  
     // We catch any exceptions that might occur below -- see the catch statement for more details.
     try {
         // First, we create a Hub with our application identifier. Be sure not to use the com.example namespace when
@@ -232,6 +221,9 @@ int main(int argc, char** argv)
         // We've found a Myo.
         std::cout << "Connected to a Myo armband!" << std::endl << std::endl;
         
+        /*
+         Establish serial communication connection to Arduino board
+        */
         arduino = fopen("/dev/cu.usbmodem1411","w");
         if (arduino == NULL) {
             printf("not open\n");
@@ -240,6 +232,7 @@ int main(int argc, char** argv)
         else {
             printf("arduino opened\n");
         }
+        
         // Next we construct an instance of our DeviceListener, so that we can register it with the Hub.
         DataCollector collector;
         // Hub::addListener() takes the address of any object whose class inherits from DeviceListener, and will cause
